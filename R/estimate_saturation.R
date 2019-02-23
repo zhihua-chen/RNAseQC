@@ -38,7 +38,7 @@ estimate_saturation <-
     method <- match.arg(method, choices=c("division", "sampling"))
     
     if(!is.null(genes)) {
-      genes <- which(rownames(countdata)==genes)
+      genes <- which(rownames(countdata) %in% genes)
     } else {
       genes <- 1:nrow(genes)
     }
