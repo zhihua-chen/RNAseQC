@@ -66,6 +66,7 @@ estimate_saturation <-
       }
       
       probs <- counts[,i, drop=TRUE] / readsums[i] # calculate gene probabilities for the library
+      probgenes <- which(probs > 0)
       probs <- probs[probs > 0] # zero counts add nothing but computational time!
       ngenes <- length(probs)
       for (j in depths) {
@@ -81,7 +82,9 @@ estimate_saturation <-
           est <- as.numeric(rep(NA, nreps))
           for (k in 1:nreps) {
             reads <- sample.int(n=ngenes, size=j, replace=TRUE, prob=probs)
-            est[k] <- sum(table(reads[genes]) >= min_counts.lib)
+            tb <- table(reads)
+            det.genes <- probgenes[as.numeric(names(tb))] %in% genes
+            est[k] <- sum(tb[det.genes] >= min_counts.lib)
           }
           sat.estimates[counter] <- mean(est)
           sat.var.estimates[counter] <- var(est)
