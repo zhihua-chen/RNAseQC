@@ -7,6 +7,7 @@
 #' times to sample at each depth (default=5), and the minimum number of counts for a gene to be
 #' counted as "detected" (default=1).
 #' @param counts a numeric matrix (or object that can be coerced to a matrix) containing read counts, or an object from which counts can be extracted. Should have genes in rows and samples in columns.
+#' @param genes a character vector of gene names to limit saturation analysis to
 #' @param max_reads the maximum number of reads to sample at. By default, this value is the maximum of total read counts across all libraries.
 #' @param method character, either "division" or "sampling". Method "sampling" is slower but more realistic, and yields smoother curves. Method "division" is faster but more coarse and less realistic. See Details for more complete description
 #' @param ndepths the number of depths to sample at. 0 is always included.
@@ -26,7 +27,8 @@
 #'   min_counts=1, min_cpm=NULL,
 #'   verbose=FALSE)}
 estimate_saturation <-
-  function(counts, max_reads=Inf,
+  function(counts, genes=NULL,
+           max_reads=Inf,
            method="sampling",
            ndepths=6, nreps=5,
            min_counts=1, min_cpm=NULL,
@@ -34,6 +36,12 @@ estimate_saturation <-
     if (sum(!is.null(min_counts), !is.null(min_cpm)) != 1)
       stop("One of min_counts or min_cpm must be specified, but not both.")
     method <- match.arg(method, choices=c("division", "sampling"))
+    
+    if(!is.null(genes)) {
+      genes <- which(rownames(countdata)==genes)
+    } else {
+      genes <- 1:nrow(genes)
+    }
     
     counts <- extract_counts(counts, return_class="matrix") # extract counts and/or convert to matrix
     
@@ -73,7 +81,7 @@ estimate_saturation <-
           est <- as.numeric(rep(NA, nreps))
           for (k in 1:nreps) {
             reads <- sample.int(n=ngenes, size=j, replace=TRUE, prob=probs)
-            est[k] <- sum(table(reads) >= min_counts.lib)
+            est[k] <- sum(table(reads[genes]) >= min_counts.lib)
           }
           sat.estimates[counter] <- mean(est)
           sat.var.estimates[counter] <- var(est)
