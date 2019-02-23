@@ -40,7 +40,7 @@ estimate_saturation <-
     if(!is.null(genes)) {
       genes <- which(rownames(countdata) %in% genes)
     } else {
-      genes <- 1:nrow(genes)
+      genes <- 1:nrow(counts)
     }
     
     counts <- extract_counts(counts, return_class="matrix") # extract counts and/or convert to matrix
